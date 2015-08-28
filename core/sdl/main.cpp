@@ -198,17 +198,17 @@ bool HandleEvents(u32 port) {
 					{
 						// printf("Mapped to %d\n",mo);
 						if (value)
-						kcode[port]&=~mo;
+						maple_controller[port].buttons &= ~mo;
 						else
-						kcode[port]|=mo;
+						maple_controller[port].buttons |= mo;
 					}
 					else if (mt==1)
 					{
 						// printf("Mapped to %d %d\n",mo,JE.value?255:0);
 						if (mo==0)
-						lt[port]=value?255:0;
+						maple_controller[port].trigger_left  = value ? 255 : 0;
 						else if (mo==1)
-						rt[port]=value?255:0;
+						maple_controller[port].trigger_right = value ? 255 : 0;
 					}
 					
 				}
@@ -228,18 +228,18 @@ bool HandleEvents(u32 port) {
 					
 					if (mt==0)
 					{
-						kcode[port]|=mo;
-						kcode[port]|=mo*2;
+						maple_controller[port].buttons |= mo;
+						maple_controller[port].buttons |= mo*2;
 						if (v<-64)
 						{
-							kcode[port]&=~mo;
+							maple_controller[port].buttons &= ~mo;
 						}
 						else if (v>64)
 						{
-							kcode[port]&=~(mo*2);
+							maple_controller[port].buttons &= ~(mo*2);
 						}
 						
-						// printf("Mapped to %d %d %d\n",mo,kcode[port]&mo,kcode[port]&(mo*2));
+						// printf("Mapped to %d %d %d\n",mo,maple_controller[port].buttons&mo,maple_controller[port].buttons&(mo*2));
 					}
 					else if (mt==1)
 					{
@@ -248,17 +248,17 @@ bool HandleEvents(u32 port) {
 						//   printf("AXIS %d,%d Mapped to %d %d %d\n",JE.number,JE.value,mo,v,v+127);
 						
 						if (mo==0)
-						lt[port]=v+127;
+						maple_controller[port].trigger_left  = v+127;
 						else if (mo==1)
-						rt[port]=v+127;
+						maple_controller[port].trigger_right = v+127;
 					}
 					else if (mt==2)
 					{
 						//  printf("AXIS %d,%d Mapped to %d %d [%d]",JE.number,JE.value,mo,v);
 						if (mo==0)
-						joyx[port]=v;
+						maple_controller[port].stick_x = v;
 						else if (mo==1)
-						joyy[port]=v;
+						maple_controller[port].stick_y = v;
 					}
 				}
 				break;
@@ -276,18 +276,18 @@ bool HandleEvents(u32 port) {
             case 0:  // nothing
               break;
             case 1:  // Up=RT, Down=LT
-              if (yy<0) rt[port]=-yy;
-              if (yy>0) lt[port]=yy;
+              if (yy<0) maple_controller[port].trigger_right = -yy;
+              if (yy>0) maple_controller[port].trigger_left  = yy;
               break;
             case 2:  // Left=LT, Right=RT
-              if (xx<0) lt[port]=-xx;
-              if (xx>0) rt[port]=xx;
+              if (xx<0) maple_controller[port].trigger_left  = -xx;
+              if (xx>0) maple_controller[port].trigger_right = xx;
               break;
             case 3:  // Nub = ABXY
-              if (xx<-127) kcode[port] &= ~DC_BTN_X;
-              if (xx>127) kcode[port] &= ~DC_BTN_B;
-              if (yy<-127) kcode[port] &= ~DC_BTN_Y;
-              if (yy>127) kcode[port] &= ~DC_BTN_A;
+              if (xx<-127) maple_controller[port].buttons &= ~DC_BTN_X;
+              if (xx>127)  maple_controller[port].buttons &= ~DC_BTN_B;
+              if (yy<-127) maple_controller[port].buttons &= ~DC_BTN_Y;
+              if (yy>127)  maple_controller[port].buttons &= ~DC_BTN_A;
               break;
           }
         break;
@@ -295,16 +295,16 @@ bool HandleEvents(u32 port) {
 			
 	}
 			
-	if (keys[0]) { kcode[port] &= ~DC_BTN_C; }
-	if (keys[6]) { kcode[port] &= ~DC_BTN_A; }
-	if (keys[7]) { kcode[port] &= ~DC_BTN_B; }
-	if (keys[5]) { kcode[port] &= ~DC_BTN_Y; }
-	if (keys[8]) { kcode[port] &= ~DC_BTN_X; }
-	if (keys[1]) { kcode[port] &= ~DC_BTN_DPAD_UP;    }
-	if (keys[2]) { kcode[port] &= ~DC_BTN_DPAD_DOWN;  }
-	if (keys[3]) { kcode[port] &= ~DC_BTN_DPAD_LEFT;  }
-	if (keys[4]) { kcode[port] &= ~DC_BTN_DPAD_RIGHT; }
-	if (keys[12]){ kcode[port] &= ~DC_BTN_START; }
+	if (keys[0]) { maple_controller[port].buttons &= ~DC_BTN_C; }
+	if (keys[6]) { maple_controller[port].buttons &= ~DC_BTN_A; }
+	if (keys[7]) { maple_controller[port].buttons &= ~DC_BTN_B; }
+	if (keys[5]) { maple_controller[port].buttons &= ~DC_BTN_Y; }
+	if (keys[8]) { maple_controller[port].buttons &= ~DC_BTN_X; }
+	if (keys[1]) { maple_controller[port].buttons &= ~DC_BTN_DPAD_UP;    }
+	if (keys[2]) { maple_controller[port].buttons &= ~DC_BTN_DPAD_DOWN;  }
+	if (keys[3]) { maple_controller[port].buttons &= ~DC_BTN_DPAD_LEFT;  }
+	if (keys[4]) { maple_controller[port].buttons &= ~DC_BTN_DPAD_RIGHT; }
+	if (keys[12]){ maple_controller[port].buttons &= ~DC_BTN_START; }
 	if (keys[9]){ 
 			//die("death by escape key"); 
 			//printf("death by escape key\n"); 
@@ -314,8 +314,8 @@ bool HandleEvents(u32 port) {
 			// is there a proper way to exit? dc_term() doesn't end the dc_run() loop it seems
 			die("death by escape key"); 
 		} 
-	if (keys[10]) rt[port]=255;
-	if (keys[11]) lt[port]=255;
+	if (keys[10]) maple_controller[port].trigger_right=255;
+	if (keys[11]) maple_controller[port].trigger_left=255;
 	
 	return true;
 }
@@ -324,9 +324,9 @@ void UpdateInputState(u32 port)
 {
 	static char key = 0;
 
-	kcode[port]=0xFFFF;
-	rt[port]=0;
-	lt[port]=0;
+	maple_controller[port].buttons=0xFFFF;
+	maple_controller[port].trigger_right=0;
+	maple_controller[port].trigger_left=0;
 	
 	HandleEvents(port);
 }
