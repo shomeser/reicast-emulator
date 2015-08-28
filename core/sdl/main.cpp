@@ -21,6 +21,7 @@
 #include <execinfo.h>
 
 #include "hw/mem/_vmem.h"
+#include "hw/maple/maple_controller.h"
 	
 #ifdef TARGET_PANDORA
 #define WINDOW_WIDTH	800
@@ -56,41 +57,9 @@ int msgboxf(const wchar* text,unsigned int type,...)
 	return MBX_OK;
 }
 
-
-
-u16 kcode[4];
-u32 vks[4];
-s8 joyx[4],joyy[4];
-u8 rt[4],lt[4];
-
 extern bool KillTex;
 
 extern void dc_term();
-
-enum DCPad {
-	Btn_C		= 1,
-	Btn_B		= 1<<1,
-	Btn_A		= 1<<2,
-	Btn_Start	= 1<<3,
-	DPad_Up		= 1<<4,
-	DPad_Down	= 1<<5,
-	DPad_Left	= 1<<6,
-	DPad_Right	= 1<<7,
-	Btn_Z		= 1<<8,
-	Btn_Y		= 1<<9,
-	Btn_X		= 1<<10,
-	Btn_D		= 1<<11,
-	DPad2_Up	= 1<<12,
-	DPad2_Down	= 1<<13,
-	DPad2_Left	= 1<<14,
-	DPad2_Right	= 1<<15,
-
-	Axis_LT= 0x10000,
-	Axis_RT= 0x10001,
-	Axis_X= 0x20000,
-	Axis_Y= 0x20001,
-};
-
 
 void emit_WriteCodeCache();
 
@@ -101,16 +70,16 @@ extern bool FrameSkipping;
 #define MAP_SIZE 32
 
 const u32 JMapBtn_USB[MAP_SIZE] =
-  { Btn_Y,Btn_B,Btn_A,Btn_X,0,0,0,0,0,Btn_Start };
+	{ DC_BTN_Y, DC_BTN_B, DC_BTN_A, DC_BTN_X, 0, 0, 0, 0, 0, DC_BTN_START };
 
 const u32 JMapAxis_USB[MAP_SIZE] =
-  { Axis_X,Axis_Y,0,0,0,0,0,0,0,0 };
+	{ DC_AXIS_X, DC_AXIS_Y, 0 ,0, 0, 0, 0, 0, 0, 0 };
 
 const u32 JMapBtn_360[MAP_SIZE] =
-  { Btn_A,Btn_B,Btn_X,Btn_Y,0,0,0,Btn_Start,0,0 };
+	{ DC_BTN_A, DC_BTN_B, DC_BTN_X, DC_BTN_Y, 0, 0, 0, DC_BTN_START, 0, 0 };
 
 const u32 JMapAxis_360[MAP_SIZE] =
-  { Axis_X,Axis_Y,Axis_LT,0,0,Axis_RT,DPad_Left,DPad_Up,0,0 };
+	{ DC_AXIS_X, DC_AXIS_Y, DC_AXIS_LT, 0, 0, DC_AXIS_RT, DC_BTN_DPAD_LEFT, DC_BTN_DPAD_UP, 0, 0 };
 
 const u32* JMapBtn=JMapBtn_USB;
 const u32* JMapAxis=JMapAxis_USB;
@@ -120,13 +89,6 @@ u32  JSensitivity[256];  // To have less sensitive value on nubs
 
 void SetupInput()
 {
-	for (int port=0;port<4;port++)
-	{
-		kcode[port]=0xFFFF;
-		rt[port]=0;
-		lt[port]=0;
-	}
-
 	// Open joystick device
 	int numjoys = SDL_NumJoysticks();
 	printf("Number of Joysticks found = %i\n", numjoys);
@@ -322,10 +284,10 @@ bool HandleEvents(u32 port) {
               if (xx>0) rt[port]=xx;
               break;
             case 3:  // Nub = ABXY
-              if (xx<-127) kcode[port] &= ~Btn_X;
-              if (xx>127) kcode[port] &= ~Btn_B;
-              if (yy<-127) kcode[port] &= ~Btn_Y;
-              if (yy>127) kcode[port] &= ~Btn_A;
+              if (xx<-127) kcode[port] &= ~DC_BTN_X;
+              if (xx>127) kcode[port] &= ~DC_BTN_B;
+              if (yy<-127) kcode[port] &= ~DC_BTN_Y;
+              if (yy>127) kcode[port] &= ~DC_BTN_A;
               break;
           }
         break;
@@ -333,16 +295,16 @@ bool HandleEvents(u32 port) {
 			
 	}
 			
-	if (keys[0]) { kcode[port] &= ~Btn_C; }
-	if (keys[6]) { kcode[port] &= ~Btn_A; }
-	if (keys[7]) { kcode[port] &= ~Btn_B; }
-	if (keys[5]) { kcode[port] &= ~Btn_Y; }
-	if (keys[8]) { kcode[port] &= ~Btn_X; }
-	if (keys[1]) { kcode[port] &= ~DPad_Up;    }
-	if (keys[2]) { kcode[port] &= ~DPad_Down;  }
-	if (keys[3]) { kcode[port] &= ~DPad_Left;  }
-	if (keys[4]) { kcode[port] &= ~DPad_Right; }
-	if (keys[12]){ kcode[port] &= ~Btn_Start; }
+	if (keys[0]) { kcode[port] &= ~DC_BTN_C; }
+	if (keys[6]) { kcode[port] &= ~DC_BTN_A; }
+	if (keys[7]) { kcode[port] &= ~DC_BTN_B; }
+	if (keys[5]) { kcode[port] &= ~DC_BTN_Y; }
+	if (keys[8]) { kcode[port] &= ~DC_BTN_X; }
+	if (keys[1]) { kcode[port] &= ~DC_BTN_DPAD_UP;    }
+	if (keys[2]) { kcode[port] &= ~DC_BTN_DPAD_DOWN;  }
+	if (keys[3]) { kcode[port] &= ~DC_BTN_DPAD_LEFT;  }
+	if (keys[4]) { kcode[port] &= ~DC_BTN_DPAD_RIGHT; }
+	if (keys[12]){ kcode[port] &= ~DC_BTN_START; }
 	if (keys[9]){ 
 			//die("death by escape key"); 
 			//printf("death by escape key\n"); 
