@@ -69,20 +69,20 @@ extern bool FrameSkipping;
 
 #define MAP_SIZE 32
 
-const u32 JMapBtn_USB[MAP_SIZE] =
+const DreamcastControllerCodes JMapBtn_USB[MAP_SIZE] =
 	{ DC_BTN_Y, DC_BTN_B, DC_BTN_A, DC_BTN_X, 0, 0, 0, 0, 0, DC_BTN_START };
 
-const u32 JMapAxis_USB[MAP_SIZE] =
+const DreamcastControllerCodes JMapAxis_USB[MAP_SIZE] =
 	{ DC_AXIS_X, DC_AXIS_Y, 0 ,0, 0, 0, 0, 0, 0, 0 };
 
-const u32 JMapBtn_360[MAP_SIZE] =
+const DreamcastControllerCodes JMapBtn_360[MAP_SIZE] =
 	{ DC_BTN_A, DC_BTN_B, DC_BTN_X, DC_BTN_Y, 0, 0, 0, DC_BTN_START, 0, 0 };
 
-const u32 JMapAxis_360[MAP_SIZE] =
+const DreamcastControllerCodes JMapAxis_360[MAP_SIZE] =
 	{ DC_AXIS_X, DC_AXIS_Y, DC_AXIS_LT, 0, 0, DC_AXIS_RT, DC_BTN_DPAD_LEFT, DC_BTN_DPAD_UP, 0, 0 };
 
-const u32* JMapBtn=JMapBtn_USB;
-const u32* JMapAxis=JMapAxis_USB;
+const DreamcastControllerCodes* JMapBtn  = JMapBtn_USB;
+const DreamcastControllerCodes* JMapAxis = JMapAxis_USB;
 #ifdef TARGET_PANDORA
 u32  JSensitivity[256];  // To have less sensitive value on nubs
 #endif
