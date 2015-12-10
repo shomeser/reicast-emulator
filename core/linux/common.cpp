@@ -105,6 +105,7 @@ void fault_handler (int sn, siginfo_t * si, void *segfault_ctx)
 #endif
 void install_fault_handler (void)
 {
+#if 0
 #if !defined(TARGET_NO_EXCEPTIONS)
 	struct sigaction act, segv_oact;
 	memset(&act, 0, sizeof(act));
@@ -118,6 +119,7 @@ void install_fault_handler (void)
     
     act.sa_sigaction = sigill_handler;
     sigaction(SIGILL, &act, &segv_oact);
+#endif
 #endif
 #endif
 }
